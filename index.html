@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Chart of CO2 and Temp</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        svg{
+            width: 60vw;
+            height: 60vh;
+            background-color: #dfdada;
+            margin: 10vw;
+        }
+
+    </style>
+    <script src="lib/d3.js"></script>
+</head>
+<body>
+    <script>
+        const margins={
+            top: 70,
+            bottom: 70,
+            left: 70,
+            right: 70,
+        }
+        const svg = d3.select("body").append("svg");
+        const height=800;
+        const width=1000;
+        svg.attr("viewBox",`0 0 ${width} ${height}`)
+        d3.csv("./data/dt.csv",d=>{
+            return{
+                date:new Date(d.date),
+                CO2: Number(d.CO2),
+                GlobalTemperature: Number(d.GlobalTemperature),
+            }
+        }).then(data=>{
+            const date_min_max=d3.extent(data,d=>d.date)
+            const CO2_min_max=d3.extent(data,d=>d.CO2)
+            const GlobalTemperature_min_max=d3.extent(data,d=>d.GlobalTemperature);
+            //scale time and date
+            const xScale=d3.scaleTime()
+            .domain(date_min_max)
+            .range([margins.left,1000-margins.right]);
+            //scale of Temp values
+            const yScale=d3.scaleLinear()
+            .domain(GlobalTemperature_min_max)
+            .range([800-margins.bottom,0+margins.top]);
+            //scale of co2 values
+            const y2Scale=d3.scaleLinear()
+            .domain(CO2_min_max)
+            .range([800-margins.bottom,0+margins.top]);
+            //Adding axis generator for x and y and y2
+            const xAxis=d3.axisBottom().scale(xScale)
+            const yAxis=d3.axisLeft().scale(yScale)
+            const y2Axis=d3.axisRight().scale(y2Scale);
+            //append x axis
+            svg.append('g').attr("class",'axis')
+            .attr("transform", `translate(0,${height-margins.bottom})`)
+            .call(xAxis)
+            svg.append('g').attr("class",'axis')
+            .attr("transform", `translate(${margins.left},0)`)
+            .call(yAxis);
+            svg.append('g').attr("class",'axis')
+            .attr("transform", `translate(930,${margins.right-65})`)
+            .call(y2Axis);
+
+         //Line generator
+         const LineGen=d3.line()
+         .x(d=>xScale(d.date))
+         .y(d=>yScale(d.GlobalTemperature))
+         //Use the line generator
+         //line mark
+         const lineGt=svg.append('g').attr("class","Gt");
+         lineGt.selectAll('lines')
+         .data([data])
+         .enter()
+         .append("path")
+         .attr("d",d=>LineGen(d))
+         const LineGen_co2=d3.line()
+         .x(d=>xScale(d.date))
+         .y(d=>y2Scale(d.CO2))
+         const lineCO2=svg.append('g').attr("class","CO2")
+         lineCO2.selectAll('lines')
+         .data([data])
+         .enter()
+         .append("path")
+         .attr("d",d=>LineGen_co2(d))
+         //legend
+        const legend = svg.append('g')
+            .attr("class","legend")
+            .attr("transform","translate(0,50)")
+            .selectAll()
+            .data([{name:"GlobalTemperature",class:"LegendGlobalTemperature"},
+                {name:"CO2",class:"LegendCO2"}])
+            .enter()
+            .append("g")
+            .attr("class",d=>d.class)
+            .attr("transform",(d,i)=>{
+                return `translate(${width/1.3},${i*20})`
+            })
+
+        legend.append("rect")
+            .attr('width',"10px")
+            .attr('height',"2px")
+
+        legend.append("text")
+            .text(d=>d.name)
+            .attr("dx","20px")
+            .attr("dy","5px")
+        
+
+        // text label for the y axis
+        svg.append("text")
+            .attr("class","label")
+            .attr("transform", "rotate(-90)")
+            .attr("y",  0)
+            .attr("x",0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Global Temperature")
+
+            svg.append("text")
+            .attr("class","label")
+            .attr("transform", "rotate(-90)")
+            .attr("y",1000)
+            .attr("x",0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("CO2")
+        
+        
+
+        // text label for the x axis
+        svg.append("text")
+            .attr("class","label")
+            .attr("transform",`translate(${width/2}, ${(height)-15})` )
+            .style("text-anchor", "middle")
+            .text("Year");
+
+
+
+        })
+    </script>
+</body>
+</html>

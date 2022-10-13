@@ -1,0 +1,30 @@
+<style>
+.axis text{
+    font-family: 'Franklin Gothic Medium';
+    font-size: 16px;
+}
+.CO2{
+    stroke-width: 4px;
+    stroke: blue;
+    fill: none;
+}
+.Gt{
+    stroke-width: 4px;
+    stroke: orangered;
+    fill: none;
+}
+.LegendGlobalTemperature{
+    fill: orangered;
+    font-size: 20pt;
+}
+.LegendCO2{
+    fill: blue;
+    font-size: 18pt;
+}
+.label{
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 20pt;
+}
+
+</style>
